@@ -48,6 +48,7 @@
     <Compile Include="Platforms\Windows\GDI32.cs" />
     <Compile Include="Platforms\Windows\User32.cs" />
     <Compile Include="Platforms\Windows\WGL.cs" />
+    <Compile Include="Platforms\Windows\WindowsContext.cs" />
     <Compile Include="Platforms\Windows\WindowsMonitor.cs" />
     <Compile Include="Platforms\Windows\WindowsNativeWindow.cs" />
     <Compile Include="Platforms\Windows\WindowsPlatformFactory.cs" />

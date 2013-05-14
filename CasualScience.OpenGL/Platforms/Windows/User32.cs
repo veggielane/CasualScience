@@ -70,7 +70,18 @@ namespace CasualScience.OpenGL.Platforms.Windows
         public static extern int ChangeDisplaySettingsEx(string deviceName, DeviceMode deviceMode, IntPtr handle, ChangeDisplaySettingsEnum dwflags, IntPtr lParam);
 
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool AdjustWindowRectEx(ref Win32Rectangle lpRect, WindowStyle dwStyle, bool bMenu, ExtendedWindowStyle dwExStyle);
+        private static extern bool AdjustWindowRectEx(ref Win32Rectangle lpRect, WindowStyle dwStyle, bool bMenu, ExtendedWindowStyle dwExStyle);
+        public static Rectangle AdjustWindowRectEx(int width, int height, WindowStyle style, bool menu, ExtendedWindowStyle extendedStyle)
+        {
+            var rect = new Win32Rectangle
+                {
+                    Right = width,
+                    Bottom = height
+                };
+            AdjustWindowRectEx(ref rect, style, menu, extendedStyle);
+            return rect.ToRectangle();
+        }
+
 
         [DllImport("User32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -741,12 +752,12 @@ namespace CasualScience.OpenGL.Platforms.Windows
         public int Right;
         public int Bottom;
 
-        internal Rectangle ToRectangle()
+        public Rectangle ToRectangle()
         {
             return Rectangle.FromLTRB(Left, Top, Right, Bottom);
         }
 
-        internal static Win32Rectangle From(Rectangle value)
+        static Win32Rectangle From(Rectangle value)
         {
             return new Win32Rectangle
                 {

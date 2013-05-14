@@ -8,6 +8,7 @@ namespace CasualScience.OpenGL.Platforms.Windows
 {
     public class WindowsNativeWindow:INativeWindow
     {
+        private readonly string _title;
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int Bits { get; private set; }
@@ -19,44 +20,23 @@ namespace CasualScience.OpenGL.Platforms.Windows
         private IntPtr _hdc;
         private IntPtr _glHandle;
 
-
         public WindowsNativeWindow(string title, int width, int height, int bits, IPlatformFactory platformFactory)
         {
+            _title = title;
             Width = width;
             Height = height;
             Bits = bits;
             _procedureDelegate = WindowProcedure;
             new Task(() =>
                 {
-                    var wc = new WindowClassEx
-                        {
-                            Size = WindowClassEx.SizeInBytes,
-                            Style = WindowClassStyle.Default,
-                            WndProc = _procedureDelegate,
-                            Instance = _instance,
-                            ClassName = _className,
-                            Cursor = User32.LoadCursor(CursorName.Arrow)
-                        };
-                    if (User32.RegisterClassEx(ref wc) == 0)
-                        throw new Exception(String.Format("Failed to reg class. Error: {0}", Marshal.GetLastWin32Error()));
-
-
-                    var exStyle = ExtendedWindowStyle.ApplicationWindow|ExtendedWindowStyle.WindowEdge;
-                    var style = WindowStyle.OverlappedWindow;
+                    RegisterClass();
+                    CreateWindow();
 
                    // var exStyle = ExtendedWindowStyle.ApplicationWindow;
                     //var style = WindowStyle.Popup;
-
-                    _handle = User32.CreateWindowEx(exStyle, _className, title, style |WindowStyle.ClipChildren|WindowStyle.ClipSiblings, 0, 0, width,
-                                                    height, IntPtr.Zero, IntPtr.Zero, _instance, IntPtr.Zero);
-                    if (_handle == IntPtr.Zero)
-                        throw new Exception(String.Format("Failed to create window. Error: {0}",
-                                                          Marshal.GetLastWin32Error()));
-
                     _hdc = User32.GetDC(_handle);
 
                     if (_hdc == IntPtr.Zero) throw new Exception("Failed to get Device Context");
-
                     var pfd = new PixelFormatDescriptor()
                         {
                             Size = PixelFormatDescriptor.SizeInBytes,
@@ -86,7 +66,7 @@ namespace CasualScience.OpenGL.Platforms.Windows
 
 
 
-                    if (Resized != null) Resized(width, height);
+                    //if (Resized != null) Resized(width, height);
 
 
 
@@ -123,6 +103,59 @@ namespace CasualScience.OpenGL.Platforms.Windows
         }
 
   
+        private void RegisterClass()
+        {
+            var wc = new WindowClassEx
+            {
+                Size = WindowClassEx.SizeInBytes,
+                Style = WindowClassStyle.HRedraw|WindowClassStyle.VRedraw|WindowClassStyle.OwnDC,
+                WndProc = _procedureDelegate,
+                Instance = _instance,
+                ClassName = _className,
+                Cursor = User32.LoadCursor(CursorName.Arrow)
+            };
+            if (User32.RegisterClassEx(ref wc) == 0)
+                throw new Exception(String.Format("Failed to reg class. Error: {0}", Marshal.GetLastWin32Error()));
+        }
+
+        private WindowStyle _style;
+        private ExtendedWindowStyle _extendedStyle;
+
+        private void CreateWindow()
+        {
+            _style = WindowStyle.ClipSiblings | WindowStyle.ClipChildren;
+            _extendedStyle = ExtendedWindowStyle.ApplicationWindow;
+
+            var fullscreen = false;
+
+            int fullWidth, fullHeight;
+            if (fullscreen)
+            {
+                _style |= WindowStyle.Popup;
+                fullWidth = Width;
+                fullHeight = Height;
+
+            }
+            else
+            {
+                _style |= WindowStyle.Caption | WindowStyle.SystemMenu | WindowStyle.MinimizeBox;
+
+                var rect = User32.AdjustWindowRectEx(Width, Height, _style, false, _extendedStyle);
+                fullWidth = rect.Right - rect.Left;
+                fullHeight = rect.Bottom - rect.Top;
+
+
+            }
+            _handle = User32.CreateWindowEx(_extendedStyle, _className, _title, _style, 0, 0, fullWidth,
+                                                    fullHeight, IntPtr.Zero, IntPtr.Zero, _instance, IntPtr.Zero);
+            if (_handle == IntPtr.Zero)
+                throw new Exception(String.Format("Failed to create window. Error: {0}",
+                                                  Marshal.GetLastWin32Error()));
+
+        }
+
+
+
 
 
         private bool _done;
