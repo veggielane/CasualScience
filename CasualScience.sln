@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasualScience.GLFWSharp", "CasualScience.GLFWSharp\CasualScience.GLFWSharp.csproj", "{26E7B9E3-35A6-4289-B3FF-E7B2D0F670EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasualScience.Test", "CasualScience.Test\CasualScience.Test.csproj", "{570E9C1C-BA6C-4B64-9D90-01356B33D725}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasualScience.OpenGL", "CasualScience.OpenGL\CasualScience.OpenGL.csproj", "{FFB7C241-4B9E-4BAF-BAFB-A014C3018F51}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{26E7B9E3-35A6-4289-B3FF-E7B2D0F670EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26E7B9E3-35A6-4289-B3FF-E7B2D0F670EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26E7B9E3-35A6-4289-B3FF-E7B2D0F670EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26E7B9E3-35A6-4289-B3FF-E7B2D0F670EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{570E9C1C-BA6C-4B64-9D90-01356B33D725}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{570E9C1C-BA6C-4B64-9D90-01356B33D725}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{570E9C1C-BA6C-4B64-9D90-01356B33D725}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{570E9C1C-BA6C-4B64-9D90-01356B33D725}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFB7C241-4B9E-4BAF-BAFB-A014C3018F51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFB7C241-4B9E-4BAF-BAFB-A014C3018F51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFB7C241-4B9E-4BAF-BAFB-A014C3018F51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFB7C241-4B9E-4BAF-BAFB-A014C3018F51}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
