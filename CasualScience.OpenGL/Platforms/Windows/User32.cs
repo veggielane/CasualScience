@@ -12,32 +12,33 @@ namespace CasualScience.OpenGL.Platforms.Windows
     public delegate IntPtr Procedure(IntPtr handle, WindowsMessage message, IntPtr wParam, IntPtr lParam);
     public static class User32
     {
+        private const string Lib = "user32.dll";
 
-        [DllImport("user32.dll", SetLastError = true), SuppressUnmanagedCodeSecurity]
+        [DllImport(Lib)]
         public static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommand nCmdShow);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern IntPtr CreateWindowEx(ExtendedWindowStyle style, IntPtr className, string windowName, WindowStyle Style, int x, int y, int width, int height, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern bool DestroyWindow(IntPtr windowHandle);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern ushort RegisterClassEx(ref WindowClassEx windowClass);
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         internal static extern short UnregisterClass(IntPtr className, IntPtr instance);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern IntPtr DefWindowProc(IntPtr hWnd, WindowsMessage msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern IntPtr LoadCursor(IntPtr instance, IntPtr cursorName);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern int GetMessage(ref MSG msg, IntPtr windowHandle, int messageFilterMin, int messageFilterMax);
-        [DllImport("User32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern IntPtr DispatchMessage(ref MSG msg);
-        [DllImport("User32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern bool TranslateMessage(ref MSG msg);
 
         public static IntPtr LoadCursor(CursorName cursor)
@@ -45,31 +46,35 @@ namespace CasualScience.OpenGL.Platforms.Windows
             return LoadCursor(IntPtr.Zero, new IntPtr((int)cursor));
         }
 
-        [DllImport("user32.dll")]
+        [DllImport(Lib)]
         public static extern void PostQuitMessage(int exitCode);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern int GetWindowText(IntPtr handle, [Out] StringBuilder titleString, int maxCount);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern bool SetWindowText(IntPtr handle, string titleString);
 
-        [DllImport("User32.dll")]
+        [DllImport(Lib)]
         public static extern long ChangeDisplaySettings(DeviceMode lpDevMode, ChangeDisplaySettingsEnum dwflags);
 
-        [DllImport("User32.dll")]
-        public static extern int EnumDisplaySettings(string lpszDeviceName, int iModeNum, ref DeviceMode lpDevMode);
+        [DllImport(Lib)]
+        public static extern int EnumDisplaySettings(string deviceName, int iModeNum, ref DeviceMode lpDevMode);
 
-        [DllImport("User32.dll")]
+        [DllImport(Lib)]
+        public static extern bool EnumDisplaySettingsEx(string deviceName, int iModeNum, ref DeviceMode lpDevMode, int dwFlags);
+
+        [DllImport(Lib)]
         public static extern int EnumDisplayDevices(string lpDevice, int iDevNum, ref DisplayDevice lpDisplayDevice, int dwFlags);
 
-        [DllImport("user32.dll")]
+        [DllImport(Lib)]
         public static extern IntPtr GetDC(IntPtr handle);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern int ChangeDisplaySettingsEx(string deviceName, DeviceMode deviceMode, IntPtr handle, ChangeDisplaySettingsEnum dwflags, IntPtr lParam);
 
-        [DllImport("user32.dll", SetLastError = true)]
+
+        [DllImport(Lib)]
         private static extern bool AdjustWindowRectEx(ref Win32Rectangle lpRect, WindowStyle dwStyle, bool bMenu, ExtendedWindowStyle dwExStyle);
         public static Rectangle AdjustWindowRectEx(int width, int height, WindowStyle style, bool menu, ExtendedWindowStyle extendedStyle)
         {
@@ -83,14 +88,14 @@ namespace CasualScience.OpenGL.Platforms.Windows
         }
 
 
-        [DllImport("User32.dll")]
+        [DllImport(Lib)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool PeekMessage(ref MSG msg, IntPtr hWnd, int messageFilterMin, int messageFilterMax, int flags);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(Lib)]
         public static extern bool SetForegroundWindow(IntPtr handle);
 
-        [DllImport("user32.dll")]
+        [DllImport(Lib)]
         public static extern IntPtr SetFocus(IntPtr handle);
     }
     [Flags]
@@ -270,11 +275,15 @@ namespace CasualScience.OpenGL.Platforms.Windows
     [StructLayout(LayoutKind.Sequential)]
     public struct WinPoint
     {
-        int X;
-        int Y;
+        public int X;
+        public int Y;
         internal Point ToPoint()
         {
             return new Point(X, Y);
+        }
+        public static WinPoint FromPoint(Point point)
+        {
+            return new WinPoint{X = point.X, Y = point.Y};
         }
     }
 

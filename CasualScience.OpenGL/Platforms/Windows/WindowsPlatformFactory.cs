@@ -19,6 +19,11 @@ namespace CasualScience.OpenGL.Platforms.Windows
             get { return new ReadOnlyCollection<IMonitor>(_monitors); }
         }
 
+        public INativeWindow CreateWindow(int width, int height, IMonitor monitor)
+        {
+            return new WindowsNativeWindow("testing", width, height, 16, monitor);
+        }
+
         public WindowsPlatformFactory()
         {
             _monitors = new List<IMonitor>();
@@ -36,12 +41,6 @@ namespace CasualScience.OpenGL.Platforms.Windows
                     }
                 }
             }
-        }
-
-        public INativeWindow CreateWindow(int width, int height)
-        {
-
-            return new WindowsNativeWindow("testing", width, height, 16,this);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 
 namespace CasualScience.OpenGL.Platforms
 {
@@ -8,7 +9,7 @@ namespace CasualScience.OpenGL.Platforms
     {
         IMonitor DefaultMonitor { get; }
         ReadOnlyCollection<IMonitor> Monitors { get; }
-        INativeWindow CreateWindow(int width, int height);
+        INativeWindow CreateWindow(int width, int height, IMonitor monitor);
     }
 
 
@@ -19,6 +20,8 @@ namespace CasualScience.OpenGL.Platforms
 
     public interface INativeWindow
     {
+        void Start();
+
         ResizedDelegate Resized { get; set; }
         LoadDelegate Load { get; set; }
         UpdateDelegate Update { get; set; }
@@ -26,63 +29,18 @@ namespace CasualScience.OpenGL.Platforms
         string Title { get; set; }
         void MakeCurrent();
         void SwapBuffers();
-
-        void SetFullscreen(IMonitor monitor);
-    }
-
-    public abstract class NativeWindowBase:INativeWindow
-    {
-        private readonly INativeWindow _implementation;
-
-        protected NativeWindowBase(IPlatformFactory platformFactory, int width, int height)
-        {
-            _implementation = platformFactory.CreateWindow(width,height);
-            _implementation.Resized += OnResize;
-            _implementation.Load += OnLoad;
-            _implementation.Update += OnUpdate;
-            _implementation.Render += OnRender;
-
-
-        }
-
-
-        public ResizedDelegate Resized { get; set; }
-        public LoadDelegate Load { get; set; }
-        public UpdateDelegate Update { get; set; }
-        public RenderDelegate Render { get; set; }
-
-        public string Title
-        {
-            get { return _implementation.Title; } 
-            set { _implementation.Title = value; }
-        }
-
-        public abstract void OnResize(int width, int height);
-        public abstract void OnLoad();
-        public abstract void OnUpdate();
-        public abstract void OnRender();
-        public void MakeCurrent()
-        {
-            _implementation.MakeCurrent();
-        }
-
-        public void SwapBuffers()
-        {
-            _implementation.SwapBuffers();
-        }
-
-        public void SetFullscreen(IMonitor monitor)
-        {
-            _implementation.SetFullscreen(monitor);
-        }
+        void SetFullscreen();
     }
 
     public interface IMonitor
     {
         string Name { get; }
+        Point Position { get; set; }
         IMonitorMode CurrentMode { get; }
         IEnumerable<IMonitorMode> Modes { get; }
         bool SetMode(IMonitorMode mode);
+
+        
     }
 
     public interface IMonitorMode

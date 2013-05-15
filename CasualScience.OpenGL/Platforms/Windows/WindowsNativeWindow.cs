@@ -9,77 +9,26 @@ namespace CasualScience.OpenGL.Platforms.Windows
     public class WindowsNativeWindow:INativeWindow
     {
         private readonly string _title;
+        private readonly IMonitor _monitor;
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int Bits { get; private set; }
 
         private IntPtr _handle;
         private readonly IntPtr _instance = Marshal.GetHINSTANCE(typeof(WindowsNativeWindow).Module);
-        private readonly Procedure _procedureDelegate;
+
         private readonly IntPtr _className = Marshal.StringToHGlobalAuto(Guid.NewGuid().ToString());
         private IntPtr _hdc;
         private IntPtr _glHandle;
 
-        public WindowsNativeWindow(string title, int width, int height, int bits, IPlatformFactory platformFactory)
+        public WindowsNativeWindow(string title, int width, int height, int bits, IMonitor monitor)
         {
             _title = title;
+            _monitor = monitor;
             Width = width;
             Height = height;
             Bits = bits;
-            _procedureDelegate = WindowProcedure;
-            new Task(() =>
-                {
-                    RegisterClass();
-                    CreateWindow();
-
-                   // var exStyle = ExtendedWindowStyle.ApplicationWindow;
-                    //var style = WindowStyle.Popup;
-                    _hdc = User32.GetDC(_handle);
-
-                    if (_hdc == IntPtr.Zero) throw new Exception("Failed to get Device Context");
-                    var pfd = new PixelFormatDescriptor()
-                        {
-                            Size = PixelFormatDescriptor.SizeInBytes,
-                            Version = 1,
-                            Flags =
-                                PixelFormatDescriptorFlags.DrawToWindow | PixelFormatDescriptorFlags.SupportOpenGL |
-                                PixelFormatDescriptorFlags.DoubleBuffer,
-                            PixelType = PixelType.RGBA,
-                            ColorBits = (byte) bits,
-                            DepthBits = 16,
-                        };
-
-                    var pixelformat = GDI32.ChoosePixelFormat(_hdc, ref pfd);
-                    if (pixelformat == 0) throw new Exception("Failed to get find pixel format");
-                    if (!GDI32.SetPixelFormat(_hdc, pixelformat, ref pfd)) throw new Exception("Can't Set The PixelFormat.");
-                    
-                    _glHandle = WGL.CreateContext(_hdc);
-                    if (_glHandle == IntPtr.Zero) throw new Exception("Failed to create context");
-
-                    MakeCurrent();
-
-
-
-                    User32.ShowWindow(_handle, ShowWindowCommand.Show);
-                    User32.SetForegroundWindow(_handle);
-                    User32.SetFocus(_handle);
-
-
-
-                    //if (Resized != null) Resized(width, height);
-
-
-
-
-                    if (Load != null) Load();
-
-
-                    //User32.ChangeDisplaySettingsEx()
-
-                    ProcessEvents();
-                }).Start();
         }
-
         public ResizedDelegate Resized { get; set; }
         public LoadDelegate Load { get; set; }
         public UpdateDelegate Update { get; set; }
@@ -96,9 +45,51 @@ namespace CasualScience.OpenGL.Platforms.Windows
             set { User32.SetWindowText(_handle, value); }
         }
 
-        public void Show()
+        public void Start()
         {
+            new Task(() =>
+            {
+                RegisterClass();
+                CreateWindow();
 
+                _hdc = User32.GetDC(_handle);
+
+                if (_hdc == IntPtr.Zero) throw new Exception("Failed to get Device Context");
+                var pfd = new PixelFormatDescriptor
+                {
+                    Size = PixelFormatDescriptor.SizeInBytes,
+                    Version = 1,
+                    Flags =
+                        PixelFormatDescriptorFlags.DrawToWindow | PixelFormatDescriptorFlags.SupportOpenGL |
+                        PixelFormatDescriptorFlags.DoubleBuffer,
+                    PixelType = PixelType.RGBA,
+                    ColorBits = (byte)Bits,
+                    DepthBits = 16,
+                };
+
+                var pixelformat = GDI32.ChoosePixelFormat(_hdc, ref pfd);
+                if (pixelformat == 0) throw new Exception("Failed to get find pixel format");
+                if (!GDI32.SetPixelFormat(_hdc, pixelformat, ref pfd)) throw new Exception("Can't Set The PixelFormat.");
+
+                _glHandle = WGL.CreateContext(_hdc);
+                if (_glHandle == IntPtr.Zero) throw new Exception("Failed to create context");
+
+                MakeCurrent();
+
+
+
+                User32.ShowWindow(_handle, ShowWindowCommand.Show);
+                User32.SetForegroundWindow(_handle);
+                User32.SetFocus(_handle);
+
+
+
+                if (Resized != null) Resized(Width, Height);
+                if (Load != null) Load();
+                //User32.ChangeDisplaySettingsEx()
+
+                ProcessEvents();
+            }).Start();
            
         }
 
@@ -109,7 +100,7 @@ namespace CasualScience.OpenGL.Platforms.Windows
             {
                 Size = WindowClassEx.SizeInBytes,
                 Style = WindowClassStyle.HRedraw|WindowClassStyle.VRedraw|WindowClassStyle.OwnDC,
-                WndProc = _procedureDelegate,
+                WndProc = WindowProcedure,
                 Instance = _instance,
                 ClassName = _className,
                 Cursor = User32.LoadCursor(CursorName.Arrow)
@@ -126,7 +117,7 @@ namespace CasualScience.OpenGL.Platforms.Windows
             _style = WindowStyle.ClipSiblings | WindowStyle.ClipChildren;
             _extendedStyle = ExtendedWindowStyle.ApplicationWindow;
 
-            var fullscreen = false;
+            var fullscreen = true;
 
             int fullWidth, fullHeight;
             if (fullscreen)
@@ -144,9 +135,9 @@ namespace CasualScience.OpenGL.Platforms.Windows
                 fullWidth = rect.Right - rect.Left;
                 fullHeight = rect.Bottom - rect.Top;
 
-
             }
-            _handle = User32.CreateWindowEx(_extendedStyle, _className, _title, _style, 0, 0, fullWidth,
+
+            _handle = User32.CreateWindowEx(_extendedStyle, _className, _title, _style, _monitor.Position.X, _monitor.Position.Y, fullWidth,
                                                     fullHeight, IntPtr.Zero, IntPtr.Zero, _instance, IntPtr.Zero);
             if (_handle == IntPtr.Zero)
                 throw new Exception(String.Format("Failed to create window. Error: {0}",
@@ -195,7 +186,7 @@ namespace CasualScience.OpenGL.Platforms.Windows
             WGL.SwapBuffers(_hdc);
         }
 
-        public void SetFullscreen(IMonitor monitor)
+        public void SetFullscreen()
         {
 
             var exStyle = ExtendedWindowStyle.ApplicationWindow;
@@ -204,14 +195,16 @@ namespace CasualScience.OpenGL.Platforms.Windows
             var dm = new DeviceMode
             {
                 Size = DeviceMode.SizeInBytes,
+                Position = WinPoint.FromPoint(_monitor.Position),
                 PelsWidth = Width,
                 PelsHeight = Height,
                 BitsPerPel = Bits,
                 Fields = DM.PelsHeight | DM.PelsWidth | DM.BitsPerPixel
             };
-
-            Console.WriteLine(monitor.Name);
-            User32.ChangeDisplaySettingsEx(monitor.Name, dm, IntPtr.Zero, ChangeDisplaySettingsEnum.Fullscreen,IntPtr.Zero);
+            User32.ChangeDisplaySettingsEx(_monitor.Name, dm, IntPtr.Zero, ChangeDisplaySettingsEnum.Fullscreen, IntPtr.Zero);
+            User32.ShowWindow(_handle, ShowWindowCommand.Show);
+            User32.SetForegroundWindow(_handle);
+            User32.SetFocus(_handle);
            // User32.ChangeDisplaySettings(dm, ChangeDisplaySettingsEnum.Fullscreen);
             //var rect = new Win32Rectangle { Left = 0, Right = Width, Top = 0, Bottom = Bits };
             //User32.AdjustWindowRectEx(ref rect, style, false, exStyle);

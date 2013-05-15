@@ -45,6 +45,8 @@
     <Compile Include="Enums.cs" />
     <Compile Include="GL.cs" />
     <Compile Include="Platforms\IPlatformFactory.cs" />
+    <Compile Include="Platforms\NativeWindowBase.cs" />
+    <Compile Include="Platforms\Platform.cs" />
     <Compile Include="Platforms\Windows\GDI32.cs" />
     <Compile Include="Platforms\Windows\User32.cs" />
     <Compile Include="Platforms\Windows\WGL.cs" />

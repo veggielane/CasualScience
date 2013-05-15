@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using CasualScience.GLFWSharp;
 using CasualScience.OpenGL;
@@ -11,10 +12,14 @@ namespace CasualScience.Test
     {
         static void Main(string[] args)
         {
+            var a = new TestWindow(Platform.Factory.DefaultMonitor);
+            a.Start();
+            a.SetFullscreen();
 
-            var factory = new WindowsPlatformFactory();
+            var b = new TestWindow(Platform.Factory.Monitors[1]);
+            b.Start();
+            b.SetFullscreen();
 
-            var test = new Test(factory);
             //var test2 = new Test(factory);
 
             //test.SetFullscreen(factory.Monitors[0]);
@@ -42,9 +47,10 @@ namespace CasualScience.Test
         }
     }
 
-    public class Test:NativeWindowBase
+    public class TestWindow:NativeWindowBase
     {
-        public Test(IPlatformFactory platformFactory) : base(platformFactory,800,600)
+        public TestWindow(IMonitor monitor)
+            : base(800, 600,monitor)
         {
 
         }
@@ -81,43 +87,6 @@ namespace CasualScience.Test
             GL.Clear(AttribMask.ColorBufferBit | AttribMask.DepthBufferBit);
             GL.ClearColor(0.5f, 0.5f, 0.5f, 0.5f);
             
-        }
-    }
-
-
-
-
-
-
-
-
-
-    public class TestWin:GLFWWindow
-    {
-        public TestWin(int width, int height, int rbits, int gbits, int bbits, int alpha, int depth, int stencil, WindowMode mode) : base(width, height, rbits, gbits, bbits, alpha, depth, stencil, mode)
-        {
-            
-        }
-
-        public override void Load()
-        {
-        
-        }
-
-        public override void Resize(int width, int height)
-        {
-
-        }
-
-        public override void Update()
-        {
-
-        }
-
-        public override void Render()
-        {
-            GL.Clear(AttribMask.ColorBufferBit | AttribMask.DepthBufferBit);
-            GL.ClearColor(1, 0, 0, 0);
         }
     }
 }
